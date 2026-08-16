@@ -62,7 +62,7 @@ func DefaultConfig() Config {
 			CPU:     CollectorConfig{Enabled: true, Interval: defaultInterval},
 			RAM:     CollectorConfig{Enabled: true, Interval: defaultInterval},
 			Swap:    CollectorConfig{Enabled: true, Interval: defaultInterval},
-			Storage: CollectorConfig{Enabled: true, Interval: defaultInterval},
+			Storage: CollectorConfig{Enabled: false, Interval: defaultInterval},
 			GPU:     CollectorConfig{Enabled: false, Interval: defaultInterval},
 		},
 	}
