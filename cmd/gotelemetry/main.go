@@ -10,24 +10,26 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/JoseM656/TelemetryGo/internal/collector"
-	"github.com/JoseM656/TelemetryGo/internal/config"
+	"github.com/JoseM656/gotelemetry/internal/collector"
+	"github.com/JoseM656/gotelemetry/internal/config"
 )
 
-// PROVISIONAL - TODO: archvio dedicado para buscar config y makefile.
-func loadpath() config.Config {
-	const configPath = "config.yml"
+func loadPath(configPath string) config.Config {
 
-	cfg, err := config.Load(configPath)
+	cfg, created, err := config.Load(configPath)
 	if err != nil {
-		if errors.Is(err, config.ErrConfigNotFound) {
-			fmt.Printf("config: %q no found, using standar configuration\n", configPath)
-		} else {
-			fmt.Printf("config: error loading %q: %v\n", configPath, err)
-		}
+		fmt.Printf("config: error loading %q: %v\n", configPath, err)
+		os.Exit(1)
+	}
+
+	if created {
+		fmt.Printf("config: %q not found. Regenerating...\n", configPath)
+	} else {
+		fmt.Printf("config loaded. %q\n", configPath)
 	}
 
 	return cfg
+
 }
 
 func main() {
@@ -39,8 +41,11 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	cfg := loadpath()
-	fmt.Printf("Configuration loaded: %+v\n\n", cfg)
+	// 1. Ejecuta cli.go
+	// args := ParseFlags()
+
+	// 3. Carga en config.go
+	cfg := loadPath("/etc/gotelemetry/config.yml")
 
 	var wg sync.WaitGroup
 
@@ -74,7 +79,7 @@ func main() {
 
 	// Bloquea main hasta recibir la señal SIGINT/SIGTERM
 	sig := <-sigChan
-	fmt.Printf("\nSeñal %v recibida. Exiting...", sig)
+	fmt.Printf("\nSignal %v recibed. Exiting...", sig)
 
 	cancel()
 
