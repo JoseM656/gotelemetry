@@ -1,4 +1,4 @@
-module github.com/JoseM656/TelemetryGo
+module github.com/JoseM656/gotelemetry
 
 go 1.26.5
 
