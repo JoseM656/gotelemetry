@@ -9,14 +9,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Config es el árbol completo leído del .yml. Por ahora solo describe, por
-// cada collector, si está habilitado y cada cuánto se lee — nada de
-// puertos, rutas de log ni flags de dashboard todavía; eso se suma cuando
-// existan los exporters que realmente lo necesiten.
 type Config struct {
 	Collectors CollectorsConfig `yaml:"collectors"`
 }
 
+// Misma declaracion de structs pero diferentes datos, reutilizacion correcta.
 type CollectorsConfig struct {
 	CPU     CollectorConfig `yaml:"cpu"`
 	RAM     CollectorConfig `yaml:"ram"`
@@ -31,27 +28,9 @@ type CollectorConfig struct {
 }
 
 // Duration envuelve time.Duration para poder escribir "5s" o "1m" en el
-// .yml en vez de nanosegundos crudos. yaml.v3 no sabe parsear ese formato
-// para time.Duration por sí solo (mismo problema que tiene encoding/json);
-// este wrapper con UnmarshalYAML es el punto exacto donde se resuelve, sin
-// tener que tocar el resto del struct.
+// .yml en vez de nanosegundos crudos.
 type Duration struct {
 	time.Duration
-}
-
-func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
-	var raw string
-	if err := value.Decode(&raw); err != nil {
-		return err
-	}
-
-	parsed, err := time.ParseDuration(raw)
-	if err != nil {
-		return fmt.Errorf("config: invalid interval %q: %w", raw, err)
-	}
-
-	d.Duration = parsed
-	return nil
 }
 
 // DefaultConfig es la configuración básica hardcodeada.
@@ -67,6 +46,25 @@ func DefaultConfig() Config {
 			GPU:     CollectorConfig{Enabled: false, Interval: defaultInterval},
 		},
 	}
+}
+
+func (d Duration) MarshalYAML() (interface{}, error) {
+	return d.Duration.String(), nil
+}
+
+func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
+	var raw string
+	if err := value.Decode(&raw); err != nil {
+		return err
+	}
+
+	parsed, err := time.ParseDuration(raw)
+	if err != nil {
+		return fmt.Errorf("config: invalid interval %q: %w", raw, err)
+	}
+
+	d.Duration = parsed
+	return nil
 }
 
 // saveDefault escribe la estructura DefaultConfig() en el disco codificada como YAML
