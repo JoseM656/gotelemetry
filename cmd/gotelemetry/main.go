@@ -14,6 +14,8 @@ import (
 	"github.com/JoseM656/gotelemetry/internal/config"
 )
 
+var BuildVersion = ""
+
 func loadPath(configPath string) config.Config {
 
 	cfg, created, err := config.Load(configPath)
@@ -34,18 +36,25 @@ func loadPath(configPath string) config.Config {
 
 func main() {
 
+	// === Procesar argumentos desde cli.go ===
+	args := ParseFlags()
+
+	if args.ShowVersion {
+		fmt.Printf("go telemetry version %v\n", BuildVersion)
+		os.Exit(0)
+	}
+
+	// Carga en config.go - PROVISIONAL TODO: Cambiar la ubicacion.
+	cfg := loadPath("/etc/gotelemetry/config.yml")
+
+	// ===========================================
+
 	// Procesar señales del sistema.
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	// 1. Ejecuta cli.go
-	// args := ParseFlags()
-
-	// 3. Carga en config.go
-	cfg := loadPath("/etc/gotelemetry/config.yml")
 
 	var wg sync.WaitGroup
 
