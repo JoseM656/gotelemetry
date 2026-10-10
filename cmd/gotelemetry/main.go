@@ -144,7 +144,7 @@ func runCollector[T any](
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 
-	// Ejecutar una primera lectura inmediata al arrancar
+	// Ejecuta la lecutura
 	stats, err := readFn()
 	printResult(name, interval, stats, err)
 
