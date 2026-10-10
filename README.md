@@ -21,7 +21,7 @@ this will be hardcoded.
 Whether or not you hardcoded a path you can use a **env variable**:
 
 ```env
-export GOTELEMETRY_CONFIG_PATH="$HOME/.config/gotelemetry/config.yml
+export GOTELEMETRY_CONFIG_PATH="$HOME/.config/gotelemetry/config.yml"
 ```
 
 Do not use `~`
