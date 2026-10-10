@@ -68,7 +68,7 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 }
 
 // saveDefault escribe la estructura DefaultConfig() en el disco codificada como YAML
-func saveDefault(path string) error {
+func SaveDefault(path string) error {
 
 	defaultCfg := DefaultConfig()
 
@@ -96,7 +96,7 @@ func Load(path string) (cfg Config, created bool, err error) {
 	if err != nil {
 		if os.IsNotExist(err) {
 			cfg = DefaultConfig()
-			if saveErr := saveDefault(path); saveErr != nil {
+			if saveErr := SaveDefault(path); saveErr != nil {
 				return cfg, false, fmt.Errorf("config: file missing and recreation failed: %w", saveErr)
 			}
 			return cfg, true, nil // true indica que se creó un archivo nuevo
