@@ -1,17 +1,11 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-	"time"
 
-	"github.com/JoseM656/gotelemetry/internal/collector"
 	"github.com/JoseM656/gotelemetry/internal/config"
+	"github.com/JoseM656/gotelemetry/internal/runner"
 )
 
 var BuildVersion = ""
@@ -84,93 +78,7 @@ func main() {
 	ConfigPath = fallbackPath()
 	cfg := loadPath(ConfigPath)
 
-	// Procesar señales del sistema.
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// Cargar configuracion en runner
+	runner.Run(cfg)
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-
-	var wg sync.WaitGroup
-
-	// Lanza cada trabajador segun su propia configuracion.
-	if cfg.Collectors.CPU.Enabled {
-		wg.Add(1)
-		go runCollector(ctx, &wg, "cpu", cfg.Collectors.CPU.Interval.Duration, collector.ReadCPU)
-	}
-
-	if cfg.Collectors.RAM.Enabled {
-		wg.Add(1)
-		go runCollector(ctx, &wg, "ram", cfg.Collectors.RAM.Interval.Duration, collector.ReadRAM)
-	}
-
-	if cfg.Collectors.Swap.Enabled {
-		wg.Add(1)
-		go runCollector(ctx, &wg, "swap", cfg.Collectors.Swap.Interval.Duration, collector.ReadSwap)
-	}
-
-	if cfg.Collectors.Storage.Enabled {
-		wg.Add(1)
-		go runCollector(ctx, &wg, "storage", cfg.Collectors.Storage.Interval.Duration, collector.ReadStorage)
-	}
-
-	if cfg.Collectors.GPU.Enabled {
-		wg.Add(1)
-		go runCollector(ctx, &wg, "gpu", cfg.Collectors.GPU.Interval.Duration, collector.ReadGPU)
-	}
-
-	fmt.Println("Running on background. Use Ctrl+C for exit.")
-
-	// Bloquea main hasta recibir la señal SIGINT/SIGTERM
-	sig := <-sigChan
-	fmt.Printf("Signal %v recibed. Exiting...\n", sig)
-
-	cancel()
-
-	// Espera a que todas las goroutines de recolectores limpien y salgan
-	wg.Wait()
-}
-
-// runCollector ejecuta la función de lectura respetando el intervalo específico de su ticker
-func runCollector[T any](
-	ctx context.Context,
-	wg *sync.WaitGroup,
-	name string,
-	interval time.Duration,
-	readFn func() (T, error),
-) {
-	defer wg.Done()
-
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	// Ejecuta la lecutura
-	stats, err := readFn()
-	printResult(name, interval, stats, err)
-
-	for {
-		select {
-		case <-ctx.Done():
-			// Se canceló el contexto
-			return
-		case <-ticker.C:
-			// Se cumplió el intervalo del componente
-			stats, err := readFn()
-			printResult(name, interval, stats, err)
-		}
-	}
-}
-
-// PROVISIONAL - TODO: Funcion de logger.
-func printResult(name string, interval time.Duration, stats any, err error) {
-	if err != nil {
-		if errors.Is(err, collector.ErrCapabilityUnavailable) {
-			fmt.Printf("[%s] no disponible en este hardware (intervalo: %s)\n", name, interval)
-		} else {
-			fmt.Printf("[%s] error: %v\n", name, err)
-		}
-		return
-	}
-
-	fmt.Printf("[%s] (intervalo: %s) => %+v\n", name, interval, stats)
 }
