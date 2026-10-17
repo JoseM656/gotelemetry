@@ -109,6 +109,7 @@ func runCollector[T any](
 	}
 }
 
+// PROVISIONAL - TODO: Issue #28, estos errores son parte de la lectura tambien.
 // Función auxiliar para gestionar los errores de forma limpia
 func handleCollectorError(name string, interval time.Duration, err error) {
 	if errors.Is(err, collector.ErrCapabilityUnavailable) {
