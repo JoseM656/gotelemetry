@@ -1,7 +1,7 @@
 BINARY_NAME=gotelemetry
 MAIN_PATH=./cmd/gotelemetry
 BUILD_ENV=CGO_ENABLED=0 GOOS=linux
-VERSION=0.61-core
+VERSION=0.81-core
 
 # You can hardcode the CONFIG_PATH if you don't want to use env's
 CONFIG_PATH ?= 

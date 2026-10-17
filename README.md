@@ -1,5 +1,5 @@
-# go!Telemetry
-Monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
+# go!telemetry
+Proof against everything monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
 
 ## Installation
 
@@ -8,23 +8,45 @@ git clone <repo-url>
 cd gotelemetry
 make install
 ```
-Or if you want to force a path for the config file:
 
-```bash
-make build CONFIG_PATH="<any/path/that/you/want>"
+## Config
+
+An easy format of configuration in yml:
+
+```yml
+collectors:
+    cpu:
+        enabled: true
+        interval: 5s
+    ram:
+        enabled: true
+        interval: 5s
+    swap:
+        enabled: true
+        interval: 5s
+    storage:
+        enabled: false
+        interval: 120s
+    gpu:
+        enabled: false
+        interval: 30s
+
 ```
+> This will be updated with more options as development progresses.
 
-this will be hardcoded.
+You can regen the config file using `gotelemetry -regen`
 
-### config file
+### Config path
 
-Whether or not you hardcoded a path you can use a **env variable**:
+For this monolith you can change the `config.yml` path, use a **env variable**:
 
 ```env
 export GOTELEMETRY_CONFIG_PATH="$HOME/.config/gotelemetry/config.yml"
+# Supports "~/"
+export GOTELEMETRY_CONFIG_PATH="~/.config/gotelemetry/config.yml"
 ```
-
-Do not use `~`
+This is useful if you dont want to use sudo, because the default path is `/etc/gotelemetry/config.yml`. Also can 
+hardcode a path using `make install CONFIG_PATH="/etc/gotelemetry/config.yml"`. But you will have to recompile for change it.
 
 ## Usage
 
