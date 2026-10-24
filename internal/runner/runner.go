@@ -80,12 +80,19 @@ func runCollector[T any](
 	executeRead := func() {
 		stats, err := readFn()
 		if err != nil {
-			// El supervisor maneja el error sin romper la app
-			handleCollectorError(name, interval, err)
+			// Captura y serializa un error de lectura.
+			payload, serializeErr := handleCollectorError(name, interval, err)
+			if serializeErr != nil {
+				fmt.Printf("[%s] error serializing error payload: %v\n", name, serializeErr)
+				return
+			}
+
+			// PROVISIONAL - TODO: Issue #3, por ahora se imprime como debug.
+			fmt.Println(string(payload))
 			return
 		}
 
-		// Si todo salió bien, recién aquí interviene el serializador
+		// Flujo de serializacion normal.
 		payload, err := serializer.FormatPayload(name, interval, stats)
 		if err != nil {
 			fmt.Printf("[%s] error serializing payload: %v\n", name, err)
@@ -109,12 +116,14 @@ func runCollector[T any](
 	}
 }
 
-// PROVISIONAL - TODO: Issue #28, estos errores son parte de la lectura tambien.
-// Función auxiliar para gestionar los errores de forma limpia
-func handleCollectorError(name string, interval time.Duration, err error) {
+// Convierte los errores en un JSON para que queden en registro tambien.
+func handleCollectorError(name string, interval time.Duration, err error) ([]byte, error) {
+
+	// En este caso es mejor desactivar el componente en configuración.
 	if errors.Is(err, collector.ErrCapabilityUnavailable) {
-		fmt.Printf("[%s] funcionality unavailable in this hardware (interval: %s)\n", name, interval)
-	} else {
-		fmt.Printf("[%s] error of lecture: %v (interval: %s)\n", name, err, interval)
+		fmt.Printf("[%s] functionality unavailable in this hardware (interval: %s)\n", name, interval)
 	}
+
+	// Crear JSON de error con serializer.
+	return serializer.FormatPayloadError(name, interval, err)
 }

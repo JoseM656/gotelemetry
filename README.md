@@ -67,6 +67,8 @@ This is useful if you dont want to use sudo, because the default path is `/etc/g
 # Normal use
 gotelemetry
 
+# ctrl + c for exit.
+
 # options
 gotelemetry -h
 ```
