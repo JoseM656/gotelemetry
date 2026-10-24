@@ -1,5 +1,6 @@
 # go!telemetry
-Proof against everything monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
+
+Robust monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
 
 ## Installation
 
@@ -7,6 +8,17 @@ Proof against everything monolithic daemon for telemetry and power consumption m
 git clone <repo-url>
 cd gotelemetry
 make install
+```
+
+If you use NixOS or home-manager you can:
+
+```bash
+# For only run
+nix run github:JoseM656/gotelemetry
+
+# To install
+nix profile install github:JoseM656/gotelemetry
+
 ```
 
 ## Config
