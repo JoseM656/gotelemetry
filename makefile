@@ -1,7 +1,8 @@
 BINARY_NAME=gotelemetry
 MAIN_PATH=./cmd/gotelemetry
 BUILD_ENV=CGO_ENABLED=0 GOOS=linux
-VERSION=0.81-core
+# Search a file 'VERSION' in the proyect root
+VERSION ?= $(shell cat VERSION | tr -d '[:space:]')
 
 # You can hardcode the CONFIG_PATH if you don't want to use env's
 CONFIG_PATH ?= 
