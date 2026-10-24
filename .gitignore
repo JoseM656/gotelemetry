@@ -1,7 +1,8 @@
 # config provisional
 config.yml
 /bin
-/result/bin/*
+result
+result-*
 
 # Binaries for programs and plugins
 *.exe
