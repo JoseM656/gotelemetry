@@ -1,5 +1,6 @@
 # go!telemetry
-Proof against everything monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
+
+Robust monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
 
 ## Installation
 
@@ -7,6 +8,17 @@ Proof against everything monolithic daemon for telemetry and power consumption m
 git clone <repo-url>
 cd gotelemetry
 make install
+```
+
+If you use NixOS or home-manager you can:
+
+```bash
+# For only run
+nix run github:JoseM656/gotelemetry
+
+# To install
+nix profile install github:JoseM656/gotelemetry
+
 ```
 
 ## Config
@@ -32,6 +44,7 @@ collectors:
         interval: 30s
 
 ```
+
 > This will be updated with more options as development progresses.
 
 You can regen the config file using `gotelemetry -regen`
@@ -45,8 +58,8 @@ export GOTELEMETRY_CONFIG_PATH="$HOME/.config/gotelemetry/config.yml"
 # Supports "~/"
 export GOTELEMETRY_CONFIG_PATH="~/.config/gotelemetry/config.yml"
 ```
-This is useful if you dont want to use sudo, because the default path is `/etc/gotelemetry/config.yml`. Also can 
-hardcode a path using `make install CONFIG_PATH="/etc/gotelemetry/config.yml"`. But you will have to recompile for change it.
+
+This is useful if you dont want to use sudo, because the default path is `/etc/gotelemetry/config.yml`. Also can hardcode a path using `make install CONFIG_PATH="/etc/gotelemetry/config.yml"`. But you will have to recompile for change it.
 
 ## Usage
 
