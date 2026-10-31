@@ -15,6 +15,12 @@ import (
 	"github.com/JoseM656/gotelemetry/internal/serializer"
 )
 
+var (
+	cachedHostname string
+	cachedVersion  string
+	localTimestamp string
+)
+
 func Run(cfg config.Config) {
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -24,6 +30,11 @@ func Run(cfg config.Config) {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	var wg sync.WaitGroup
+
+	// Evalua si agregar la hora local al resultado
+	if cfg.General.LocalTime.Enable {
+		localTimestamp = time.Now().Format(time.RFC3339)
+	}
 
 	// Lanza cada trabajador segun su propia configuracion.
 	if cfg.Collectors.CPU.Enabled {
@@ -64,13 +75,8 @@ func Run(cfg config.Config) {
 
 }
 
-func runCollector[T any](
-	ctx context.Context,
-	wg *sync.WaitGroup,
-	name string,
-	interval time.Duration,
-	readFn func() (T, error),
-) {
+func runCollector[T any](ctx context.Context, wg *sync.WaitGroup, name string, interval time.Duration, readFn func() (T, error)) {
+
 	defer wg.Done()
 
 	ticker := time.NewTicker(interval)
@@ -93,7 +99,7 @@ func runCollector[T any](
 		}
 
 		// Flujo de serializacion normal.
-		payload, err := serializer.FormatPayload(name, interval, stats)
+		payload, err := serializer.FormatPayload(cachedHostname, cachedVersion, name, interval, stats, localTimestamp)
 		if err != nil {
 			fmt.Printf("[%s] error serializing payload: %v\n", name, err)
 			return
@@ -121,9 +127,15 @@ func handleCollectorError(name string, interval time.Duration, err error) ([]byt
 
 	// En este caso es mejor desactivar el componente en configuración.
 	if errors.Is(err, collector.ErrCapabilityUnavailable) {
-		fmt.Printf("[%s] functionality unavailable in this hardware (interval: %s)\n", name, interval)
+		fmt.Printf("[%s] on %s: functionality unavailable in this hardware (interval: %s)\n", name, cachedHostname, interval)
 	}
 
 	// Crear JSON de error con serializer.
-	return serializer.FormatPayloadError(name, interval, err)
+	return serializer.FormatPayloadError(cachedHostname, cachedVersion, name, interval, err, localTimestamp)
+}
+
+// Consigue información extra una sola vez.
+func SetMetadata(hostname, version string) {
+	cachedHostname = hostname
+	cachedVersion = version
 }

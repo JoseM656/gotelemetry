@@ -10,8 +10,27 @@ import (
 	"github.com/JoseM656/gotelemetry/internal/runner"
 )
 
+// Se modifican en tiempo de compilación.
 var BuildVersion = ""
 var ConfigPath = ""
+
+// Hardcodeado con intención.
+var JSONVersion = "v1"
+
+// Resuelto en la primera ejecución
+var Hostname = ""
+
+// Resuelve leer el hostname en la primera ejecución y guardarlo en Hostname
+func getHostname() string {
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		fmt.Printf("fatal: unable to obtain the device's hostname: %v\n", err)
+		os.Exit(1)
+	}
+
+	return hostname
+}
 
 // Resuelve encontrar el path de la configuración
 func fallbackPath() string {
@@ -99,11 +118,16 @@ func main() {
 
 	// == Fin de procesar argumentos desde cli.go ===
 
+	// Consultar hostname
+	Hostname = getHostname()
+
 	// Cargar path
 	ConfigPath = fallbackPath()
 	cfg := loadPath(ConfigPath)
 
+	// Cargar hostname y versión.
+	runner.SetMetadata(Hostname, JSONVersion)
+
 	// Cargar configuracion en runner
 	runner.Run(cfg)
-
 }

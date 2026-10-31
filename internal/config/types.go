@@ -8,16 +8,28 @@ import (
 )
 
 type Config struct {
+	General    GeneralConfig    `yaml:"general"`
 	Collectors CollectorsConfig `yaml:"collectors"`
 }
 
-// Misma declaracion de structs pero diferentes datos, reutilizacion correcta.
+// Configuracion general
+type GeneralConfig struct {
+	LocalTime LocalTimestamp `yaml:"local_timestamp"`
+	// otras posibles config...
+}
+
+// Structs para los collectores.
 type CollectorsConfig struct {
 	CPU     CollectorConfig `yaml:"cpu"`
 	RAM     CollectorConfig `yaml:"ram"`
 	Swap    CollectorConfig `yaml:"swap"`
 	Storage CollectorConfig `yaml:"storage"`
 	GPU     CollectorConfig `yaml:"gpu"`
+}
+
+// Struct para activar el horario local.
+type LocalTimestamp struct {
+	Enable bool `yaml:"enable"`
 }
 
 type CollectorConfig struct {
@@ -36,6 +48,11 @@ func DefaultConfig() Config {
 	defaultInterval := Duration{5 * time.Second}
 
 	return Config{
+
+		General: GeneralConfig{
+			LocalTime: LocalTimestamp{Enable: false},
+		},
+
 		Collectors: CollectorsConfig{
 			CPU:     CollectorConfig{Enabled: true, Interval: defaultInterval},
 			RAM:     CollectorConfig{Enabled: true, Interval: defaultInterval},
