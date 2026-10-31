@@ -2,6 +2,10 @@
 
 Robust monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
 
+```json
+{"hostname":"MACHINA-GEN-X","version":"v1","timestamp":"2026-10-31T21:21:31Z","local_timestamp":"2026-10-31T18:21:31-03:00","component":"cpu","interval":"5s","data":{"User":477444,"Nice":23,"System":126498,"Idle":10298361,"Iowait":18941,"IRQ":36587,"SoftIRQ":18873,"Steal":0}}
+```
+
 ## Installation
 
 ```bash
@@ -26,6 +30,10 @@ nix profile install github:JoseM656/gotelemetry
 An easy format of configuration in yml:
 
 ```yml
+general:
+    # optional: add an extra field to the JSON containing the local time, default is in UTC.
+    local_timestamp:
+        enable: false 
 collectors:
     cpu:
         enabled: true
