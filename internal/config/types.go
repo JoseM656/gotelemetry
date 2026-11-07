@@ -8,13 +8,14 @@ import (
 )
 
 type Config struct {
-	General    GeneralConfig    `yaml:"general"`
+	Output     OutputConfig     `yaml:"output"`
 	Collectors CollectorsConfig `yaml:"collectors"`
 }
 
-// Configuracion general
-type GeneralConfig struct {
-	LocalTime LocalTimestamp `yaml:"local_timestamp"`
+// Configuracion de salida.
+type OutputConfig struct {
+	LocalTime    LocalTimestamp       `yaml:"local_timestamp"`
+	PrettyOutput PrettyIntervalOutput `yaml:"pretty_interval_output"`
 	// otras posibles config...
 }
 
@@ -29,7 +30,12 @@ type CollectorsConfig struct {
 
 // Struct para activar el horario local.
 type LocalTimestamp struct {
-	Enable bool `yaml:"enable"`
+	Enabled bool `yaml:"enabled"`
+}
+
+// Struct para activar una salida mas legible del intervalo en el JSON.
+type PrettyIntervalOutput struct {
+	Enabled bool `yaml:"enabled"`
 }
 
 type CollectorConfig struct {
@@ -49,8 +55,9 @@ func DefaultConfig() Config {
 
 	return Config{
 
-		General: GeneralConfig{
-			LocalTime: LocalTimestamp{Enable: false},
+		Output: OutputConfig{
+			LocalTime:    LocalTimestamp{Enabled: false},
+			PrettyOutput: PrettyIntervalOutput{Enabled: true},
 		},
 
 		Collectors: CollectorsConfig{

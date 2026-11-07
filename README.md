@@ -3,7 +3,7 @@
 Robust monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
 
 ```json
-{"hostname":"MACHINA-GEN-X","version":"v1","timestamp":"2026-10-31T21:21:31Z","local_timestamp":"2026-10-31T18:21:31-03:00","component":"cpu","interval":"5s","data":{"User":477444,"Nice":23,"System":126498,"Idle":10298361,"Iowait":18941,"IRQ":36587,"SoftIRQ":18873,"Steal":0}}
+{"hostname":"MACHINA-GEN-X","version":"v1","timestamp":"2026-11-07T20:36:04Z","local_timestamp":"2026-11-07T17:36:04-03:00","component":"cpu","interval":5000,"pretty_interval":"5s","data":{"User":1254318,"Nice":348,"System":376742,"Idle":34050078,"Iowait":40766,"IRQ":103512,"SoftIRQ":51245,"Steal":0}}
 ```
 
 ## Installation
@@ -30,10 +30,12 @@ nix profile install github:JoseM656/gotelemetry
 An easy format of configuration in yml:
 
 ```yml
-general:
-    # optional: add an extra field to the JSON containing the local time, default is in UTC.
+Output:
     local_timestamp:
-        enable: false 
+        enable: false
+    # optional: add an extra field to the JSON containing the interval in seconds or minutes, not milliseconds.
+    pretty_interval_output:
+        enable: true 
 collectors:
     cpu:
         enabled: true
@@ -54,6 +56,11 @@ collectors:
 ```
 
 > This will be updated with more options as development progresses.
+
+### Options
+
+- `local_timestamp` add an extra field to the JSON (`"local_timestamp":"2026-11-07T17:36:04-03:00"`) containing the local time, default is in UTC.
+- `pretty_interval_output` add an extra field to the JSON (`"pretty_interval":"5s"`) containing the interval in seconds or minutes, not milliseconds.
 
 You can regen the config file using `gotelemetry -regen`
 
