@@ -30,7 +30,7 @@ nix profile install github:JoseM656/gotelemetry
 An easy format of configuration in yml:
 
 ```yml
-Output:
+output:
     local_timestamp:
         enable: false
     # optional: add an extra field to the JSON containing the interval in seconds or minutes, not milliseconds.
