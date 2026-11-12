@@ -8,6 +8,8 @@ Robust monolithic daemon for telemetry and power consumption monitoring designed
 
 ## Installation
 
+For installation you can download the releases or use make:
+
 ```bash
 git clone <repo-url>
 cd gotelemetry
@@ -62,7 +64,7 @@ collectors:
 - `local_timestamp` add an extra field to the JSON (`"local_timestamp":"2026-11-07T17:36:04-03:00"`) containing the local time, default is in UTC.
 - `pretty_interval_output` add an extra field to the JSON (`"pretty_interval":"5s"`) containing the interval in seconds or minutes, not milliseconds.
 
-You can regen the config file using `gotelemetry -regen`
+You can regen the config file using `gotelemetry regen path/that/you/want`
 
 ### Config path
 
@@ -74,7 +76,20 @@ export GOTELEMETRY_CONFIG_PATH="$HOME/.config/gotelemetry/config.yml"
 export GOTELEMETRY_CONFIG_PATH="~/.config/gotelemetry/config.yml"
 ```
 
-This is useful if you dont want to use sudo, because the default path is `/etc/gotelemetry/config.yml`. Also can hardcode a path using `make install CONFIG_PATH="/etc/gotelemetry/config.yml"`. But you will have to recompile for change it.
+This is useful if you dont want to use sudo, because the default path is `/etc/gotelemetry/config.yml`.
+
+### CLI
+
+On the CLI you can regenerate or select a config file using:
+
+```bash
+gotelemtery regen --path ~/.config/gotelemetry/config.yml
+
+# And for running that configuration
+gotelemetry --path ~/.config/gotelemetry/config.yml
+```
+
+In that way you can have multiple configurations files.
 
 ## Usage
 
@@ -85,5 +100,5 @@ gotelemetry
 # ctrl + c for exit.
 
 # options
-gotelemetry -h
+gotelemetry help
 ```

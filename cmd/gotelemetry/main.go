@@ -34,7 +34,7 @@ func getHostname() string {
 
 // Resuelve encontrar el path de la configuración
 func fallbackPath() string {
-	// 1. Inyectado desde el Makefile
+	// 1. Inyectado desde el Makefile o CLI
 	if ConfigPath != "" {
 		parsedConfigPath := fixPath(ConfigPath)
 		return parsedConfigPath
@@ -47,11 +47,10 @@ func fallbackPath() string {
 	}
 
 	// 3. Default
-	fmt.Println("fallback: There is not a selected config path or a env, using default /etc/gotelemetry/config.yml,\nthis will require your permission if the file not exist. :D")
+	fmt.Println("fallback: There is not a selected config path or a env, using default /etc/gotelemetry/config.yml,\nthis will require sudo if the file not exist. :D")
 	return "/etc/gotelemetry/config.yml"
 }
 
-// Expande el símbolo ~ al directorio home real del usuario
 // Expande el símbolo ~ al directorio home real del usuario
 func fixPath(path string) string {
 	// 1. ¿empieza con "~/"?
@@ -95,39 +94,52 @@ func loadPath(path string) config.Config {
 func main() {
 
 	// === Procesar argumentos desde cli.go ===
-	args := ParseFlags()
 
-	if args.ShowVersion {
-		fmt.Printf("go telemetry version %v\n", BuildVersion)
-		os.Exit(0)
+	opts := ParseFlags()
+
+	// Si el usuario pasó un flag explícito de path por CLI se sincroniza.
+	// ESTO SOLO SE QUEDA EN RAM.
+	if opts.ConfigPath != "" {
+		ConfigPath = opts.ConfigPath
 	}
 
-	if args.RegenConfig {
-		// Gestiona el fallback al regenerar
+	// Evaluar cual argumento se ejecuta.
+	switch opts.Command {
+	case "version":
+		fmt.Printf("go telemetry version %v\n", BuildVersion)
+		os.Exit(0)
+
+	case "regen":
+
 		ConfigPath = fallbackPath()
 		err := config.SaveDefault(ConfigPath)
 		if err != nil {
 			fmt.Printf("error regenerating in %q: %v\n", ConfigPath, err)
 			os.Exit(1)
 		}
-
 		fmt.Printf("config regenerated in %v\n", ConfigPath)
 		os.Exit(0)
 
+	case "path":
+		ConfigPath = fallbackPath()
+		fmt.Printf("The config path is aiming to: %q\n", ConfigPath)
+		os.Exit(0)
+
+	// Si se ejecuta gotelemetry sin opción cobra activa rootCmd.
+	case "daemon":
+		// Consultar hostname
+		Hostname = getHostname()
+
+		// Cargar path
+		ConfigPath = fallbackPath()
+		cfg := loadPath(ConfigPath)
+
+		// Cargar hostname y versión.
+		runner.SetMetadata(Hostname, JSONVersion)
+
+		// Cargar configuracion en runner
+		runner.Run(cfg)
+
 	}
 
-	// == Fin de procesar argumentos desde cli.go ===
-
-	// Consultar hostname
-	Hostname = getHostname()
-
-	// Cargar path
-	ConfigPath = fallbackPath()
-	cfg := loadPath(ConfigPath)
-
-	// Cargar hostname y versión.
-	runner.SetMetadata(Hostname, JSONVersion)
-
-	// Cargar configuracion en runner
-	runner.Run(cfg)
 }
