@@ -8,14 +8,15 @@ import (
 )
 
 type Config struct {
+	General    GeneralConfig    `yaml:"general"`
 	Output     OutputConfig     `yaml:"output"`
 	Collectors CollectorsConfig `yaml:"collectors"`
 }
 
-// Configuracion de salida.
-type OutputConfig struct {
-	LocalTime    LocalTimestamp       `yaml:"local_timestamp"`
-	PrettyOutput PrettyIntervalOutput `yaml:"pretty_interval_output"`
+// Configuracion de salida y demas.
+type GeneralConfig struct {
+	LocalTime    BooleanStandar `yaml:"local_timestamp"`        // Struct para activar el horario local.
+	PrettyOutput BooleanStandar `yaml:"pretty_interval_output"` // Struct para activar una salida mas legible del intervalo en el JSON.
 	// otras posibles config...
 }
 
@@ -28,19 +29,25 @@ type CollectorsConfig struct {
 	GPU     CollectorConfig `yaml:"gpu"`
 }
 
-// Struct para activar el horario local.
-type LocalTimestamp struct {
-	Enabled bool `yaml:"enabled"`
+// Elegir que exporters usar.
+type OutputConfig struct {
+	LOG    LogExporter    `yaml:"logger"`
+	STDOUT BooleanStandar `yaml:"stdout"`
 }
 
-// Struct para activar una salida mas legible del intervalo en el JSON.
-type PrettyIntervalOutput struct {
+// Struct generico para todos los que solo requieran un booleano.
+type BooleanStandar struct {
 	Enabled bool `yaml:"enabled"`
 }
 
 type CollectorConfig struct {
 	Enabled  bool     `yaml:"enabled"`
 	Interval Duration `yaml:"interval"`
+}
+
+type LogExporter struct {
+	Enabled bool   `yaml:"enabled"`
+	Path    string `yaml:"path"`
 }
 
 // Duration envuelve time.Duration para poder escribir "5s" o "1m" en el
@@ -55,9 +62,9 @@ func DefaultConfig() Config {
 
 	return Config{
 
-		Output: OutputConfig{
-			LocalTime:    LocalTimestamp{Enabled: false},
-			PrettyOutput: PrettyIntervalOutput{Enabled: true},
+		General: GeneralConfig{
+			LocalTime:    BooleanStandar{Enabled: false},
+			PrettyOutput: BooleanStandar{Enabled: true},
 		},
 
 		Collectors: CollectorsConfig{
@@ -66,6 +73,11 @@ func DefaultConfig() Config {
 			Swap:    CollectorConfig{Enabled: true, Interval: defaultInterval},
 			Storage: CollectorConfig{Enabled: false, Interval: defaultInterval},
 			GPU:     CollectorConfig{Enabled: false, Interval: defaultInterval},
+		},
+
+		Output: OutputConfig{
+			LOG:    LogExporter{Enabled: false, Path: ""},
+			STDOUT: BooleanStandar{Enabled: true},
 		},
 	}
 }
