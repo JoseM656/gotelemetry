@@ -1,6 +1,6 @@
 # go!telemetry
 
-Robust monolithic daemon for telemetry and power consumption monitoring designed for Linux servers.
+Robust monolithic daemon for telemetry and power consumption monitoring designed for Linux servers. Export information about various components using json in stdout, log files, and more.
 
 ```json
 {"hostname":"MACHINA-GEN-X","version":"v1","timestamp":"2026-11-07T20:36:04Z","local_timestamp":"2026-11-07T17:36:04-03:00","component":"cpu","interval":5000,"pretty_interval":"5s","data":{"User":1254318,"Nice":348,"System":376742,"Idle":34050078,"Iowait":40766,"IRQ":103512,"SoftIRQ":51245,"Steal":0}}
@@ -32,32 +32,36 @@ nix profile install github:JoseM656/gotelemetry
 An easy format of configuration in yml:
 
 ```yml
+general:
+    local_timestamp: 
+        enabled: false
+    pretty_interval_output: 
+        enabled: true
 output:
-    local_timestamp:
-        enable: false
-    # optional: add an extra field to the JSON containing the interval in seconds or minutes, not milliseconds.
-    pretty_interval_output:
-        enable: true 
+    logger:
+        enabled: true
+        path: "~/Documentos/logs" # put here where do you want .log files
+    stdout:
+        enabled: false
 collectors:
     cpu:
         enabled: true
-        interval: 5s
+        interval: 500ms
     ram:
         enabled: true
-        interval: 5s
+        interval: 500ms
     swap:
         enabled: true
-        interval: 5s
+        interval: 500ms
     storage:
         enabled: false
-        interval: 120s
+        interval: 1h
     gpu:
         enabled: false
-        interval: 30s
-
+        interval: 5s
 ```
 
-> This will be updated with more options as development progresses.
+> Use units like ms, s or h.
 
 ### Options
 
@@ -102,3 +106,7 @@ gotelemetry
 # options
 gotelemetry help
 ```
+
+---
+
+This project is still ongoing, so further changes may occur. Thanks for your interest! :D
