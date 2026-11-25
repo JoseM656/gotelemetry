@@ -97,6 +97,10 @@ func (d *Duration) UnmarshalYAML(value *yaml.Node) error {
 		return fmt.Errorf("config: invalid interval %q: %w", raw, err)
 	}
 
+	if parsed <= 0 {
+		return fmt.Errorf("interval must be greater than 0, got %v", d)
+	}
+
 	d.Duration = parsed
 	return nil
 }
