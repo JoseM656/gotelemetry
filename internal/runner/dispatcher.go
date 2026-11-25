@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/JoseM656/gotelemetry/internal/config"
@@ -43,13 +44,13 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 
 	// 1. Validación fail-fast al arrancar
 	if !stdoutEnabled && !loggerEnabled {
-		fmt.Println("error: there isn't selected an exporter for telemetry. Check config file. Exiting...")
+		fmt.Fprintln(os.Stderr, "error: there isn't selected an exporter for telemetry. Check config file. Exiting...")
 		cancel()
 		return
 	}
 
 	if loggerEnabled && cfg.Output.LOG.Path == "" {
-		fmt.Printf("error: log path is empty, add one or disable this exporter. Exiting...\n")
+		fmt.Fprintf(os.Stderr, "error: log path is empty, add one or disable this exporter. Exiting...\n")
 		cancel()
 		return
 	}
@@ -59,7 +60,7 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 
 	var stdoutChan chan []byte
 	if stdoutEnabled {
-		fmt.Println("exporting using stdout...")
+		fmt.Fprintln(os.Stderr, "exporting using stdout...")
 		stdoutChan = make(chan []byte, 64)
 		wg.Add(1)
 		go runExporterWorker(
@@ -76,7 +77,7 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 
 	var logChan chan []byte
 	if loggerEnabled {
-		fmt.Printf("exporting logs in %s\n", cfg.Output.LOG.Path)
+		fmt.Fprintf(os.Stderr, "exporting logs in %s\n", cfg.Output.LOG.Path)
 		logChan = make(chan []byte, 64)
 		wg.Add(1)
 		go runExporterWorker(
@@ -108,11 +109,11 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("exporters shutting down...")
+			fmt.Fprintln(os.Stderr, "exporters shutting down...")
 			return
 
 		case err := <-errChan:
-			fmt.Printf("error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			cancel()
 			return
 

@@ -66,17 +66,17 @@ func Run(cfg config.Config) {
 		go runCollector(ctx, &wg, "gpu", cfg.Collectors.GPU.Interval.Duration, metricsChan, EnableLocalTimestamp, EnablePrettyInterval, collector.ReadGPU)
 	}
 
-	fmt.Println("Running on background. Use Ctrl+C or SIGTERM for exit.")
+	fmt.Fprintln(os.Stderr, "Running on background. Use Ctrl+C or SIGTERM for exit.")
 
 	// Cerrar el contexto de runner si hay una señal o un error interno.
 	select {
 	case sig := <-sigChan:
-		fmt.Printf("\nSignal %v received. Exiting...\n", sig)
+		fmt.Fprintf(os.Stderr, "\nSignal %v received. Exiting...\n", sig)
 	case <-ctx.Done():
-		fmt.Println("Context cancelled internally. Exiting...")
+		fmt.Fprintln(os.Stderr, "Context cancelled internally. Exiting...")
 	}
 
-	fmt.Println("collectors shutting down...")
+	fmt.Fprintln(os.Stderr, "collectors shutting down...")
 
 	cancel()
 
@@ -121,7 +121,7 @@ func runCollector[T any](
 			// 2. Si hay error, se pasan los opcionales al error tambien.
 			payload, serializeErr := handleCollectorError(name, interval, err, opts)
 			if serializeErr != nil {
-				fmt.Printf("[%s] error serializing error payload: %v\n", name, serializeErr)
+				fmt.Fprintf(os.Stderr, "[%s] error serializing error payload: %v\n", name, serializeErr)
 				return
 			}
 			// Debug.
@@ -131,7 +131,7 @@ func runCollector[T any](
 			select {
 			case metricsChan <- payload:
 			default:
-				fmt.Println("error: internal channel is full, dropping payload to prevent blocking")
+				fmt.Fprintln(os.Stderr, "error: internal channel is full, dropping payload to prevent blocking")
 			}
 			return
 		}
@@ -139,7 +139,7 @@ func runCollector[T any](
 		// 3. Flujo de serialización normal
 		payload, err := serializer.FormatPayload(cachedHostname, cachedVersion, name, interval, opts, stats)
 		if err != nil {
-			fmt.Printf("[%s] error serializing payload: %v\n", name, err)
+			fmt.Fprintf(os.Stderr, "[%s] error serializing payload: %v\n", name, err)
 			return
 		}
 
@@ -150,7 +150,7 @@ func runCollector[T any](
 		select {
 		case metricsChan <- payload:
 		default:
-			fmt.Println("error: internal channel is full, dropping payload to prevent blocking")
+			fmt.Fprintln(os.Stderr, "error: internal channel is full, dropping payload to prevent blocking")
 		}
 
 	}
@@ -170,7 +170,7 @@ func runCollector[T any](
 // Convierte los errores en un JSON para que queden en registro tambien.
 func handleCollectorError(name string, interval time.Duration, err error, opts serializer.PayloadOptions) ([]byte, error) {
 	if errors.Is(err, collector.ErrCapabilityUnavailable) {
-		fmt.Printf("[%s] on %s: functionality unavailable in this hardware (interval: %s)\n", name, cachedHostname, interval)
+		fmt.Fprintf(os.Stderr, "[%s] on %s: functionality unavailable in this hardware (interval: %s)\n", name, cachedHostname, interval)
 	}
 
 	return serializer.FormatPayloadError(cachedHostname, cachedVersion, name, interval, opts, err)
