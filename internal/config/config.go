@@ -19,7 +19,7 @@ func SaveDefault(path string) error {
 	}
 
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0775); err != nil {
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		return fmt.Errorf("config: error recreating %s: %w", path, err)
 	}
 
