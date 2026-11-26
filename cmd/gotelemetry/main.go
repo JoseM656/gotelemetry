@@ -25,7 +25,7 @@ func getHostname() string {
 
 	hostname, err := os.Hostname()
 	if err != nil {
-		fmt.Printf("fatal: unable to obtain the device's hostname: %v\n", err)
+		fmt.Fprintf(os.Stderr, "fatal: unable to obtain the device's hostname: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -47,7 +47,7 @@ func fallbackPath() string {
 	}
 
 	// 3. Default
-	fmt.Println("fallback: There is not a selected config path or a env, using default /etc/gotelemetry/config.yml,\nthis will require sudo if the file not exist. :D")
+	fmt.Fprintln(os.Stderr, "fallback: no config path or env selected, using default /etc/gotelemetry/config.yml (may require sudo if missing :p)")
 	return "/etc/gotelemetry/config.yml"
 }
 
@@ -63,7 +63,7 @@ func fixPath(path string) string {
 	if err != nil {
 		// Sí o sí hay que parsear la expresión "~/", caso contrario se crea una carpeta fantasma
 		// con el nombre literal "~", pero si no hay un usuario mejor abortar y avisar.
-		fmt.Printf("There is not a user space or could not parse '~/' in path: %v\n", err)
+		fmt.Fprintf(os.Stderr, "There is not a user space or could not parse '~/' in path: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -76,15 +76,15 @@ func loadPath(path string) config.Config {
 
 	cfg, created, err := config.Load(path)
 	if err != nil {
-		fmt.Printf("error loading %q: %v\n", path, err)
+		fmt.Fprintf(os.Stderr, "error loading %q: %v\n", path, err)
 		os.Exit(1)
 	}
 
 	if created {
-		fmt.Printf("config: %q not found. Regenerating...\n", path)
+		fmt.Fprintf(os.Stderr, "config: %q not found. Regenerating...\n", path)
 
 	} else {
-		fmt.Printf("config loaded. %q\n", path)
+		fmt.Fprintf(os.Stderr, "config loaded: %q\n", path)
 	}
 
 	return cfg

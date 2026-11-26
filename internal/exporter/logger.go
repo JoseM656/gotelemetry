@@ -57,6 +57,12 @@ func ensureLogFileOpen(fullPath string) (*os.File, error) {
 		return logFile, nil
 	}
 
+	// crear el path si no existe
+	dir := filepath.Dir(fullPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("creating log directory %q: %w", dir, err)
+	}
+
 	f, err := os.OpenFile(fullPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		return nil, err

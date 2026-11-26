@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -66,7 +69,11 @@ func ParseFlags() Options {
 	rootCmd.AddCommand(pathCmd)
 
 	// Ejecutar el parser de Cobra
-	_ = rootCmd.Execute()
+	err := rootCmd.Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error parsing CLI: %v\n", err)
+		os.Exit(1)
+	}
 
 	return opts
 }
