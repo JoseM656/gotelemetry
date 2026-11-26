@@ -34,7 +34,11 @@ func Run(cfg config.Config) {
 	var wg sync.WaitGroup
 
 	// Iniciar el dispacher y su lectura del canal como una gorutina.
-	go StartDispatcher(ctx, cfg, metricsChan, cancel)
+	// Tiene grupo propio para poder ceerarlo de forma propia.
+	var dispWg sync.WaitGroup
+	dispWg.Go(func() {
+		StartDispatcher(ctx, cfg, metricsChan, cancel)
+	})
 
 	// Variables opcionales segun la configuración leidas al arrancar.
 	EnableLocalTimestamp := cfg.General.LocalTime.Enabled
@@ -78,9 +82,19 @@ func Run(cfg config.Config) {
 
 	fmt.Fprintln(os.Stderr, "collectors shutting down...")
 
+	// === Secuencia de apagado ===
+
+	// Collectores paran
 	cancel()
 
+	// Esperar que se terminen los escitores
 	wg.Wait()
+
+	// Cerrar el canal principal
+	close(metricsChan)
+
+	// Esperar a que dispacher drene el buffer y cierre
+	dispWg.Wait()
 }
 
 func runCollector[T any](

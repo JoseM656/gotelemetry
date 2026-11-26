@@ -115,10 +115,6 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 	// 2. Bucle despachador principal
 	for {
 		select {
-		case <-ctx.Done():
-			fmt.Fprintln(os.Stderr, "exporters shutting down...")
-			return
-
 		case err := <-errChan:
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			cancel()
@@ -126,24 +122,15 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 
 		case payload, ok := <-metricsChan:
 			if !ok {
-				cancel()
+				fmt.Fprintln(os.Stderr, "exporters shutting down...")
 				return
 			}
 
 			if stdoutEnabled {
-				select {
-				case stdoutChan <- payload:
-				case <-ctx.Done():
-					return
-				}
+				stdoutChan <- payload
 			}
-
 			if loggerEnabled {
-				select {
-				case logChan <- payload:
-				case <-ctx.Done():
-					return
-				}
+				logChan <- payload
 			}
 		}
 	}
