@@ -47,7 +47,7 @@ func fallbackPath() string {
 	}
 
 	// 3. Default
-	fmt.Fprintln(os.Stderr, "fallback: no config path or env selected, using default /etc/gotelemetry/config.yml (may require sudo if missing)")
+	fmt.Fprintln(os.Stderr, "fallback: no config path or env selected, using default /etc/gotelemetry/config.yml (may require sudo if missing :p)")
 	return "/etc/gotelemetry/config.yml"
 }
 

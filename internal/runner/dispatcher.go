@@ -103,6 +103,13 @@ func StartDispatcher(ctx context.Context, cfg config.Config, metricsChan <-chan 
 			close(logChan)
 		}
 		wg.Wait()
+
+		// Cerrar el archivo si logger esta trabajando.
+		if loggerEnabled {
+			if err := exporter.CloseLogFile(); err != nil {
+				fmt.Fprintf(os.Stderr, "error closing log file: %v\n", err)
+			}
+		}
 	}()
 
 	// 2. Bucle despachador principal
